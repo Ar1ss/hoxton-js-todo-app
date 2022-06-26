@@ -7,8 +7,9 @@
 let state = {
   todos: [
     {title : "Go shoping" , completed: false},
-    {title : "Work out"  , completed: false},
-    {title : "Eat diner" , completed: false}, 
+    {title : "Work out"  , completed: true},
+    {title : "Eat diner" , completed: true},
+    {title : "Do something" , completed : true}
   ],
   showCompleted:false
 }
@@ -17,27 +18,38 @@ function incompleteTodo(){
   return state.todos.filter(todo => todo.completed === false)
 }
 
-function creaeTodo(text){
-  let foundMatch = state.todos.some(todo => todo.text === text)
-  if (foundMatch) return
+function createTodo(title){
+  let match = state.todos.some(todo => todo.title === title)
+  if (match) return
+  state.todos.push({title : title , completed : false})
 }
 
 function completedTodos(){
   return state.todos.filter(todo => todo.completed === true)
 }
 
-function deleteTodo(text){
-  let updatedTodos = state.todos.filter(todo => todo.text !== text)
+function deleteTodo(title){
+  let updatedTodos = state.todos.filter(todo => todo.title !== title)
   state.todos = updatedTodos
 }
 
-function toggleTodo(text){
-  let match = state.todos.find(todo => todo.text === text)
+function toggleTodo(title){
+  let match = state.todos.find(todo => todo.text === title)
   if (!match) return
 }
 
 function toggleCompletedTodo(){
   state.showCompleted = !state.showCompleted
+}
+
+function getIncompleteTodos(){
+  return state.todos.filter(todo => todo.completed === false)
+}
+
+
+
+function getTodosToTheDisplay(){
+  if(state.showCompleted)return getIncompleteTodos
 }
 
 
@@ -58,6 +70,12 @@ function render() {
   let optionsCheckBox = document.createElement("input")
   optionsCheckBox.id = "show-completed"
   optionsCheckBox.setAttribute("type", "checkbox")
+  if(state.showCompleted) optionsCheckBox.checked = true
+  optionsCheckBox.addEventListener('click', function(){
+    toggleCompletedTodo()
+    render()
+  })
+  
   
 
   let optionsCheckBoxName = document.createElement("label")
@@ -69,19 +87,59 @@ function render() {
   let addItemTitle = document.createElement('h1')
   addItemTitle.textContent = 'ADD ITEM'
 
-  let addItemSection = document.createElement("section")
-  addItemSection.className = "additem__section"
-
   let addItemInput = document.createElement('input')
   addItemInput.className = 'add-item__input'
   addItemInput.setAttribute('type' , 'text')
   addItemInput.setAttribute('placeholder' , 'Add here...')
 
+  let additemForm = document.createElement("form")
+  additemForm.className = "add-item__form"
+
+    additemForm.addEventListener("submit" , function(event){
+    event.preventDefault()
+    createTodo(addItemInput.value)
+    render()
+  }) 
+
+  let addItemSection = document.createElement("section")
+  addItemSection.className = "additem__section"
+
   let addItemButton = document.createElement("button")
   addItemButton.className = "additem__button"
   addItemButton.textContent = "Add"
-  
+
   //Todo
+
+  let todoList = document.createElement("ul")
+
+  let tododeleteBtn = document.createElement("button")
+  tododeleteBtn.textContent= "Delete"
+
+
+
+  for(let todo of state.todos){
+    let todoItemLi = document.createElement("li")
+    todoItemLi.className = "todo"
+
+
+    let tododeleteBtn = document.createElement("button")
+    tododeleteBtn.textContent= "Delete"
+    tododeleteBtn.addEventListener('click', function(){
+      deleteTodo(todo.title)
+      render()
+    })
+
+
+    let tdodoItemChBox = document.createElement("input")
+    tdodoItemChBox.setAttribute('type',"checkbox")
+    
+
+
+    todoItemLi.textContent = todo.title
+    todoList.append(todoItemLi)
+    todoItemLi.append( tdodoItemChBox,tododeleteBtn)
+    
+  }
 
   let todoSection = document.createElement("section")
   todoSection.className = "todo__section"
@@ -94,15 +152,18 @@ function render() {
   todoCheckBox.setAttribute("type" , "checkbox")
 
 
-  //Completed
 
-  let completedTitle = document.createElement('h1')
-  completedTitle.textContent = 'COMPLETED'
+  //Append
 
+  additemForm.append(addItemInput,addItemButton)
   optinionsSection.append(optionsCheckBox,optionsCheckBoxName)
-  addItemSection.append(addItemInput,addItemButton)
-  todoSection.append(todoCheckBox,)
+  addItemSection.append(additemForm)
+  todoSection.append(todoList,)
+  
 
+  
+
+  
   document.body.append(mainForm)
   mainForm.append(
     optnionsTitleh1,
@@ -111,7 +172,7 @@ function render() {
     addItemSection,
     todoTitle,
     todoSection,
-    completedTitle,
+
     )
   
   
